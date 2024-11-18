@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -13,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace Mastermind
 {
@@ -20,17 +23,32 @@ namespace Mastermind
     {
         private List<string> colors = new List<string> { "Red", "Yellow", "Orange", "White", "Green", "Blue" };
         private List<string> code;
+        DispatcherTimer timer;
+        DateTime clicked;
+        TimeSpan elapsedTime;
         //private List<string> attempts;
 
         public MainWindow()
         {
             InitializeComponent();
             InitializeGame();
-
+            timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromMilliseconds(1);
+            timer.Tick += timer_Tick;
+        }
+        private void timer_Tick(object sender, EventArgs e)
+        {
+            elapsedTime = DateTime.Now - clicked;  // Update elapsedTime correctly
+            timeLabel.Text = $"{elapsedTime.Seconds}.{elapsedTime.Milliseconds.ToString().PadLeft(3, '0')} ";
+        }
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            DateTime nu = DateTime.Now;
         }
 
         private void InitializeGame()
         {
+            
             // Generate a random code
             Random rand = new Random();
             code = new List<string>();
@@ -86,6 +104,9 @@ namespace Mastermind
         {
             ComboBox[] comboBoxes = { ComboBox1, ComboBox2, ComboBox3, ComboBox4 };
             List<string> selectedColors = new List<string>();
+
+            clicked = DateTime.Now;
+            timer.Start();
 
             for (int i = 0; i < comboBoxes.Length; i++)
             {
